@@ -26,5 +26,5 @@ WHEN I refresh the page
 THEN the saved events persist
 
 
-
-## https://raymundofina.github.io/Work-Day-Organizer/
+...
+https://raymundofina.github.io/Work-Day-Organizer/
