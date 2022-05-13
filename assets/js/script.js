@@ -1,52 +1,68 @@
-var todaysDate = moment().format("dddd, MMM Do YYYY");
-$("#currentDay").html(todaysDate);
+var schedule = [];
 
-$(document).ready(function () {
-    
-    // buttons function
+// this function gives the current date
+document.getElementById("currentDay").innerHTML = moment().format("dddd, MMMM Do");
 
-    $(".saveBtn").on("click", function () {
-        var text = $(this).siblings(".description").val();
-        var time = $(this).parent().attr("id");
+if( localStorage.getItem("schedule")){
+    schedule = JSON.parse(localStorage.getItem("schedule"));
+}
 
-     //Saving to local storage  
-        localStorage.setItem(time, text);
-    })
-
-    function timeTracker() {
-        var timeNow = moment().hour();
-
-        $(".time-block").each(function () {
-            var blockTime = parseInt($(this).attr("id").split("hour")[1]);
-
-    // Checks time and changes background
-            if (blockTime < timeNow) {
-                $(this).removeClass("future");
-                $(this).removeClass("present");
-                $(this).addClass("past");
-            }
-            else if (blockTime === timeNow) {
-                $(this).removeClass("past");
-                $(this).removeClass("future");
-                $(this).addClass("present");
-            }
-            else {
-                $(this).removeClass("present");
-                $(this).removeClass("past");
-                $(this).addClass("future");
-            }
-
-        })
+for(i=9;i<=17;i++){
+    if(schedule[i] != null){
+        $("#description-" + i).html(schedule[i].desc);
     }
-    $("#9am .description").val(localStorage.getItem("9am"));
-    $("#10am .description").val(localStorage.getItem("10am"));
-    $("#11am .description").val(localStorage.getItem("11am"));
-    $("#12pm .description").val(localStorage.getItem("12pm"));
-    $("#1pm .description").val(localStorage.getItem("1pm"));
-    $("#2pm .description").val(localStorage.getItem("2pm"));
-    $("#3pm .description").val(localStorage.getItem("3pm"));
-    $("#4pm .description").val(localStorage.getItem("4pm"));
-    $("#5pm .description").val(localStorage.getItem("5pm"));
 
-    timeTracker();
-})
+    if(i < moment().hour()){
+        $("#description-" + i).addClass("past");
+    }else if(i == moment().hour()){
+        $("#description-" + i).addClass("present");
+    }else{
+        $("#description-" + i).addClass("future");
+    }
+}
+
+$(".description").click(function(){
+    var id = $(this).attr("id").replace("description-", "");
+
+    if(!$("#textarea-" + id).length){
+        $(this).html("");
+
+        var newEl = document.createElement("textarea");
+        $(newEl).attr("id", "textarea-" + id);
+        $(newEl).attr("rows", "3");
+        $(newEl).attr("max-rows", "3");
+
+        $(this).append(newEl);
+
+        for(var i=9;i<schedule.length;i++){
+            if(schedule[i] != null){
+                if(schedule[i].time === id){
+                    $(newEl).val(schedule[i].desc);
+                    break;
+                }
+            }
+        }
+
+        $(newEl).css("padding", "10px");
+        $("#description-" + id).css("padding", "0");
+
+        newEl.focus();
+    }
+    
+});
+
+// Save data to localStorage
+$(".container").on("click", ".saveBtn", function(){
+    var id = $(this).attr("id").replace("save-", "");
+    var desc = $("#textarea-" + id).val();
+
+    schedule[parseInt(id)] = {
+        time: id,
+        desc: desc
+    };
+
+    localStorage.setItem("schedule", JSON.stringify(schedule));
+    
+    $("#description-" + id).css("padding", "10px");
+    $("#description-" + id).html(desc);
+});
